@@ -1,0 +1,24 @@
+- hosts: destination-group
+  become: yes
+  tasks:
+    - name: Check health server ubuntu and output to file
+      ansible.builtin.shell: |
+        echo "Memory used: "`free -m | grep Mem | tr -s " " "-" | cut -d "-" -f 3` >> /home/`date +%Y%m%d"-"%H`.txt
+        echo "Memory free: "`free -m | grep Mem | tr -s " " "-" | cut -d "-" -f 4` >> /home/`date +%Y%m%d"-"%H`.txt
+        echo "CPU: "`top -b -n 1|grep Cpu | cut -d " " -f 5` >> /home/`date +%Y%m%d"-"%H`.txt
+        echo "Uptime: "`top -b -n 1|grep top | grep up | cut -d " " -f 5,6` >> /home/`date +%Y%m%d"-"%H`.txt
+        echo "Disk used: "`df -h | grep "/$" | tr -s " " "*" | cut -d "*" -f 5` >> /home/`date +%Y%m%d"-"%H`.txt
+      tags: check-health
+    - name: Copy file check_heath.sh 
+      template:
+        src: check_health.sh.j2
+        dest: /home/check_health.sh
+        mode: 755
+      tags: copy-file
+    - name: Register crond for file
+      cron:
+        name: check health server ubuntu
+        hour: "*/1"
+        job: "/bin/sh /home/check_health.sh >2&1"
+        state: present
+      tags: cron-register
