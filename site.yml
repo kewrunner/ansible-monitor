@@ -9,7 +9,7 @@
         echo "Uptime: "`top -b -n 1|grep top | grep up | cut -d " " -f 5,6` >> /home/`date +%Y%m%d"-"%H`.txt
         echo "Disk used: "`df -h | grep "/$" | tr -s " " "*" | cut -d "*" -f 5` >> /home/`date +%Y%m%d"-"%H`.txt
       tags: check-health
-    - name: Copy file check_heath.sh 
+    - name: Copy file check_health.sh 
       template:
         src: check_health.sh.j2
         dest: /home/check_health.sh
